@@ -32,11 +32,14 @@ def generate_launch_description():
     # -------------------------
     # Global Localization Include
     # -------------------------
-    global_localization_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(get_package_share_directory('hdl_global_localization'), 'launch', 'hdl_global_localization.launch.py')
-        ),
-        condition=IfCondition(use_global_localization)
+    global_localization_node = Node(
+        package='hdl_global_localization',
+        executable='hdl_global_localization_node',
+        name='hdl_global_localization_node',
+        output='screen',
+        parameters=[{
+            # Add your parameters here if needed
+        }]
     )
 
     # -------------------------
@@ -143,7 +146,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument('globalmap_pcd', default_value='/home/markov/maps/map_02/GlobalMap.pcd'),
 
-        global_localization_launch,
+        global_localization_node,
         container,
         # plot_node
     ])
