@@ -140,6 +140,7 @@ private:
     robot_odom_frame_id_ = this->declare_parameter("robot_odom_frame_id", "robot_odom");
     odom_child_frame_id_ = this->declare_parameter("odom_child_frame_id", "base_link");
     use_imu_ = this->declare_parameter("use_imu", true);
+    imu_linear_acc_unit_g_ = this->declare_parameter("imu_linear_acc_unit_g", true);
     invert_acc_ = this->declare_parameter("invert_acc", false);
     invert_gyro_ = this->declare_parameter("invert_gyro", false);
 
@@ -197,10 +198,61 @@ private:
    * @brief callback for imu data
    * @param imu_msg
    */
-  void imu_callback(sensor_msgs::msg::Imu::SharedPtr msg) {
-    std::lock_guard<std::mutex> lock(imu_data_mutex_);
-    imu_data_.push_back(msg);
+void imu_callback(sensor_msgs::msg::Imu::SharedPtr msg) {
+  // Convert g → m/s^2 if needed
+  if (imu_linear_acc_unit_g_) {     
+    constexpr double g = 9.80665;
+    msg->linear_acceleration.x *= g;
+    msg->linear_acceleration.y *= g;
+    msg->linear_acceleration.z *= g;
   }
+
+  // Transform IMU data into odom_child_frame_id_
+  geometry_msgs::msg::TransformStamped tf_imu;
+  try {
+    tf_imu = tf_buffer_->lookupTransform(
+      odom_child_frame_id_,        // target frame
+      msg->header.frame_id,        // IMU frame
+      msg->header.stamp,           // use IMU timestamp
+      rclcpp::Duration::from_seconds(0.05)
+    );
+  } catch (tf2::TransformException& ex) {
+    RCLCPP_WARN(this->get_logger(), "IMU TF failed: %s", ex.what());
+    return;
+  }
+
+  // Extract rotation
+  Eigen::Matrix3d R = tf2::transformToEigen(tf_imu).rotation();
+
+  // Original vectors
+  Eigen::Vector3f acc(msg->linear_acceleration.x,
+                      msg->linear_acceleration.y,
+                      msg->linear_acceleration.z);
+
+  Eigen::Vector3f gyro(msg->angular_velocity.x,
+                       msg->angular_velocity.y,
+                       msg->angular_velocity.z);
+
+  // Rotate into odom_child_frame_id_
+  Eigen::Vector3f acc_rot = R.cast<float>() * acc;
+  Eigen::Vector3f gyro_rot = R.cast<float>() * gyro;
+
+  // Write back into message (overwrite with transformed data)
+  msg->linear_acceleration.x = acc_rot.x();
+  msg->linear_acceleration.y = acc_rot.y();
+  msg->linear_acceleration.z = acc_rot.z();
+
+  msg->angular_velocity.x = gyro_rot.x();
+  msg->angular_velocity.y = gyro_rot.y();
+  msg->angular_velocity.z = gyro_rot.z();
+
+  // IMPORTANT: also update frame_id to reflect new frame
+  msg->header.frame_id = odom_child_frame_id_;
+
+  // Store transformed IMU
+  std::lock_guard<std::mutex> lock(imu_data_mutex_);
+  imu_data_.push_back(msg);
+}
 
   /**
    * @brief callback for point cloud data
@@ -224,7 +276,7 @@ private:
     // transform pointcloud into odom_child_frame_id
     pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>());
     try {
-      geometry_msgs::msg::TransformStamped tf = tf_buffer_->lookupTransform(odom_child_frame_id_, points_msg->header.frame_id, stamp, rclcpp::Duration::from_seconds(0.1));
+      geometry_msgs::msg::TransformStamped tf = tf_buffer_->lookupTransform(odom_child_frame_id_, points_msg->header.frame_id, rclcpp::Time(0), rclcpp::Duration::from_seconds(0.1));
 
       sensor_msgs::msg::PointCloud2 transformed_msg;
       tf2::doTransform(*points_msg, transformed_msg, tf);
@@ -551,6 +603,7 @@ private:
   bool specify_init_pose_;
 
   bool use_imu_;
+  bool imu_linear_acc_unit_g_;
   bool invert_acc_;
   bool invert_gyro_;
   double max_correspondence_dist_, max_valid_point_dist_;

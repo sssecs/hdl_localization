@@ -19,7 +19,8 @@ def generate_launch_description():
     points_topic = LaunchConfiguration('points_topic')
     odom_child_frame_id = LaunchConfiguration('odom_child_frame_id')
 
-    use_imu = LaunchConfiguration('use_imu')
+    use_imu = LaunchConfiguration('use_imu'),
+    imu_linear_acc_unit_g = LaunchConfiguration('imu_linear_acc_unit_g'),
     invert_imu_acc = LaunchConfiguration('invert_imu_acc')
     invert_imu_gyro = LaunchConfiguration('invert_imu_gyro')
     use_global_localization = LaunchConfiguration('use_global_localization')
@@ -63,7 +64,7 @@ def generate_launch_description():
                 parameters=[{
                     'globalmap_pcd': globalmap_pcd,
                     'convert_utm_to_local': True,
-                    'downsample_resolution': 0.1,
+                    'downsample_resolution': 0.2,
                 }]
             ),
 
@@ -84,6 +85,7 @@ def generate_launch_description():
 
                     # imu
                     'use_imu': use_imu,
+                    'imu_linear_acc_unit_g': imu_linear_acc_unit_g,
                     'invert_acc': invert_imu_acc,
                     'invert_gyro': invert_imu_gyro,
                     'cool_time_duration': 2.0,
@@ -97,7 +99,7 @@ def generate_launch_description():
                     'ndt_neighbor_search_method': 'DIRECT7',
                     'ndt_neighbor_search_radius': 2.0,
                     'ndt_resolution': 1.0,
-                    'downsample_resolution': 0.1,
+                    'downsample_resolution': 0.2,
 
                     # init pose
                     'specify_init_pose': True,
@@ -131,11 +133,12 @@ def generate_launch_description():
     # -------------------------
     return LaunchDescription([
 
-        DeclareLaunchArgument('component_container', default_value='velodyne_component_container'),
+        DeclareLaunchArgument('component_container', default_value='hdl_localization_container'),
         DeclareLaunchArgument('points_topic', default_value='/livox/lidar'),
-        DeclareLaunchArgument('odom_child_frame_id', default_value='livox_frame'),
+        DeclareLaunchArgument('odom_child_frame_id', default_value='base_link'),
 
         DeclareLaunchArgument('use_imu', default_value='false'),
+        DeclareLaunchArgument('imu_linear_acc_unit_g', default_value='true'),
         DeclareLaunchArgument('invert_imu_acc', default_value='false'),
         DeclareLaunchArgument('invert_imu_gyro', default_value='false'),
         DeclareLaunchArgument('use_global_localization', default_value='true'),
@@ -144,7 +147,7 @@ def generate_launch_description():
         DeclareLaunchArgument('robot_odom_frame_id', default_value='odom'),
         DeclareLaunchArgument('plot_estimation_errors', default_value='false'),
 
-        DeclareLaunchArgument('globalmap_pcd', default_value='/home/markov/maps/map_02/GlobalMap.pcd'),
+        DeclareLaunchArgument('globalmap_pcd', default_value='//home/markov/nav_ws/install/humanoid_nav2_bringup/share/humanoid_nav2_bringup/maps/LOAM_01/localization_cloud.pcd'),
 
         global_localization_node,
         container,
