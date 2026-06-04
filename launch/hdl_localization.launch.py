@@ -103,9 +103,11 @@ def generate_launch_description():
 
                     # init pose
                     'specify_init_pose': True,
+                    # 'init_pos_x': -6.728906154632568,
+                    # 'init_pos_y': 18.065521240234375,
                     'init_pos_x': 0.0,
                     'init_pos_y': 0.0,
-                    'init_pos_z': 0.0,
+                    'init_pos_z': 1.1,
                     'init_ori_w': 1.0,
                     'init_ori_x': 0.0,
                     'init_ori_y': 0.0,
@@ -137,17 +139,17 @@ def generate_launch_description():
         DeclareLaunchArgument('points_topic', default_value='/livox/lidar'),
         DeclareLaunchArgument('odom_child_frame_id', default_value='base_link'),
 
-        DeclareLaunchArgument('use_imu', default_value='false'),
+        DeclareLaunchArgument('use_imu', default_value='true'),
         DeclareLaunchArgument('imu_linear_acc_unit_g', default_value='true'),
         DeclareLaunchArgument('invert_imu_acc', default_value='false'),
         DeclareLaunchArgument('invert_imu_gyro', default_value='false'),
-        DeclareLaunchArgument('use_global_localization', default_value='true'),
+        DeclareLaunchArgument('use_global_localization', default_value='false'),
         DeclareLaunchArgument('imu_topic', default_value='/livox/imu'),
         DeclareLaunchArgument('enable_robot_odometry_prediction', default_value='false'),
         DeclareLaunchArgument('robot_odom_frame_id', default_value='odom'),
         DeclareLaunchArgument('plot_estimation_errors', default_value='false'),
 
-        DeclareLaunchArgument('globalmap_pcd', default_value='//home/markov/nav_ws/install/humanoid_nav2_bringup/share/humanoid_nav2_bringup/maps/LOAM_01/localization_cloud.pcd'),
+        DeclareLaunchArgument('globalmap_pcd', default_value='/home/unitree/markov/nav_ws/install/humanoid_nav2_bringup/share/humanoid_nav2_bringup/maps/2nd_floor/pc/localization_cloud.pcd'),
 
         global_localization_node,
         container,

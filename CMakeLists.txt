@@ -51,8 +51,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ScanMatchingStatus.msg"
   DEPENDENCIES std_msgs geometry_msgs
 )
-rosidl_get_typesupport_target(cpp_typesupport_target
-  ${PROJECT_NAME} "rosidl_typesupport_cpp")
+ament_export_dependencies(rosidl_default_runtime)
+# rosidl_get_typesupport_target(cpp_typesupport_target
+#   ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 ###########
 ## Build ##
@@ -87,7 +88,9 @@ ament_target_dependencies(hdl_localization_component
 )
 target_link_libraries(hdl_localization_component
   ${PCL_LIBRARIES}
-  ${cpp_typesupport_target}
+)
+rosidl_target_interfaces(hdl_localization_component
+  ${PROJECT_NAME} "rosidl_typesupport_cpp"
 )
 rclcpp_components_register_nodes(hdl_localization_component
   "hdl_localization::HdlLocalizationComponent"
@@ -105,7 +108,6 @@ ament_target_dependencies(globalmap_server_component
 )
 target_link_libraries(globalmap_server_component
   ${PCL_LIBRARIES}
-  ${cpp_typesupport_target}
 )
 rclcpp_components_register_nodes(globalmap_server_component
   "hdl_localization::GlobalmapServerComponent"

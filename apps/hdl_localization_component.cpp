@@ -5,11 +5,11 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
 
-#include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_eigen/tf2_eigen.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#include <tf2_sensor_msgs/tf2_sensor_msgs.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 
 #include <std_srvs/srv/empty.hpp>
 #include <sensor_msgs/msg/imu.hpp>
@@ -169,7 +169,7 @@ private:
     enable_odom_prediction_ = this->declare_parameter<bool>("enable_robot_odometry_prediction", false);
 
     // intialize scan matching method
-    auto voxelgrid = std::make_shared<pcl::VoxelGrid<PointT>>();
+    auto voxelgrid = boost::make_shared<pcl::VoxelGrid<PointT>>();
     voxelgrid->setLeafSize(downsample_resolution_, downsample_resolution_, downsample_resolution_);
     downsample_filter_ = voxelgrid;
 
