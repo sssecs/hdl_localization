@@ -96,10 +96,10 @@ def generate_launch_description():
 
                     # ndt
                     'reg_method': 'NDT_OMP',
-                    'ndt_neighbor_search_method': 'DIRECT7',
-                    'ndt_neighbor_search_radius': 2.0,
+                    'ndt_neighbor_search_method': 'KDTREE',
+                    'ndt_neighbor_search_radius': 0.5,
                     'ndt_resolution': 1.0,
-                    'downsample_resolution': 0.2,
+                    'downsample_resolution': 0.3,
 
                     # init pose
                     'specify_init_pose': True,

@@ -259,6 +259,29 @@ void imu_callback(sensor_msgs::msg::Imu::SharedPtr msg) {
    * @param points_msg
    */
   void points_callback(sensor_msgs::msg::PointCloud2::SharedPtr points_msg) {
+
+    auto now = std::chrono::steady_clock::now();
+
+    if (!first_) {
+      double dt =
+          std::chrono::duration<double>(now - last_time_).count();
+
+      if (dt > 0.3){
+        double freq = 1.0 / dt;
+
+        RCLCPP_WARN(
+            this->get_logger(),
+            "Elapsed: %.6f s (%.3f ms), Frequency: %.2f Hz",
+            dt,
+            dt * 1000.0,
+            freq);
+        }
+    } else {
+      first_ = false;
+    }
+
+    last_time_ = now;
+
     if (!globalmap_) {
       RCLCPP_ERROR(this->get_logger(), "No global map");
       return;
@@ -654,6 +677,9 @@ private:
   rclcpp::Service<std_srvs::srv::Empty>::SharedPtr relocalize_service_;
   rclcpp::Client<hdl_global_localization::srv::SetGlobalMap>::SharedPtr set_global_map_client_;
   rclcpp::Client<hdl_global_localization::srv::QueryGlobalLocalization>::SharedPtr query_global_localization_client_;
+
+  std::chrono::steady_clock::time_point last_time_;
+  bool first_;
 };
 }  // namespace hdl_localization
 
