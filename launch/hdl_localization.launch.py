@@ -102,7 +102,7 @@ def generate_launch_description():
                     'downsample_resolution': 0.2,
 
                     # init pose
-                    'specify_init_pose': True,
+                    'specify_init_pose': False,
                     'init_pos_x': 0.0,
                     'init_pos_y': 0.0,
                     'init_pos_z': 0.0,
@@ -128,6 +128,14 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Static transform publisher
+    static_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_tf_pub',
+        arguments=['0', '0', '0', '0', '0', '3.141592653589793', 'base_link', 'livox_frame']
+    )
+
     # -------------------------
     # Declare Arguments
     # -------------------------
@@ -137,19 +145,20 @@ def generate_launch_description():
         DeclareLaunchArgument('points_topic', default_value='/livox/lidar'),
         DeclareLaunchArgument('odom_child_frame_id', default_value='base_link'),
 
-        DeclareLaunchArgument('use_imu', default_value='false'),
+        DeclareLaunchArgument('use_imu', default_value='true'),
         DeclareLaunchArgument('imu_linear_acc_unit_g', default_value='true'),
         DeclareLaunchArgument('invert_imu_acc', default_value='false'),
         DeclareLaunchArgument('invert_imu_gyro', default_value='false'),
-        DeclareLaunchArgument('use_global_localization', default_value='true'),
+        DeclareLaunchArgument('use_global_localization', default_value='false'),
         DeclareLaunchArgument('imu_topic', default_value='/livox/imu'),
         DeclareLaunchArgument('enable_robot_odometry_prediction', default_value='false'),
         DeclareLaunchArgument('robot_odom_frame_id', default_value='odom'),
         DeclareLaunchArgument('plot_estimation_errors', default_value='false'),
 
-        DeclareLaunchArgument('globalmap_pcd', default_value='//home/markov/nav_ws/install/humanoid_nav2_bringup/share/humanoid_nav2_bringup/maps/LOAM_01/localization_cloud.pcd'),
+        DeclareLaunchArgument('globalmap_pcd', default_value='/home/unitree/3d_nav/maps/2nd_floor/pc/localization_cloud.pcd'),
 
         global_localization_node,
         container,
+        static_tf,
         # plot_node
     ])

@@ -264,6 +264,26 @@ void imu_callback(sensor_msgs::msg::Imu::SharedPtr msg) {
       return;
     }
 
+    auto now = std::chrono::steady_clock::now();
+
+    if (!first_) {
+        double dt =
+            std::chrono::duration<double>(now - last_time_).count();
+
+        double freq = 1.0 / dt;
+
+        // RCLCPP_INFO(
+        //     this->get_logger(),
+        //     "Elapsed: %.6f s (%.3f ms), Frequency: %.2f Hz",
+        //     dt,
+        //     dt * 1000.0,
+        //     freq);
+    } else {
+        first_ = false;
+    }
+
+    last_time_ = now;
+
     const auto& stamp = points_msg->header.stamp;
     pcl::PointCloud<PointT>::Ptr pcl_cloud(new pcl::PointCloud<PointT>());
     pcl::fromROSMsg(*points_msg, *pcl_cloud);
@@ -654,6 +674,9 @@ private:
   rclcpp::Service<std_srvs::srv::Empty>::SharedPtr relocalize_service_;
   rclcpp::Client<hdl_global_localization::srv::SetGlobalMap>::SharedPtr set_global_map_client_;
   rclcpp::Client<hdl_global_localization::srv::QueryGlobalLocalization>::SharedPtr query_global_localization_client_;
+
+  std::chrono::steady_clock::time_point last_time_;
+  bool first_ = true;
 };
 }  // namespace hdl_localization
 
